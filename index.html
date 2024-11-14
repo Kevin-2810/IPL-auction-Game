@@ -215,7 +215,7 @@
     function announcePlayerDetails(player) {
         const textToSpeak = `Next player is ${player.name}. Base price is ₹${player.basePrice}. ${player.category}Player`;
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        utterance.lang = 'en-IND'; // Set language to English
+        utterance.lang = 'en-US'; // Set language to English
         speechSynthesis.speak(utterance); // Speak the announcement
       }
       
