@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPL Auction 2025</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #c0a9ed; text-align: center; }
+    
+    .container { max-width: 1200px; margin: auto; display: flex; justify-content: space-between; flex-wrap: wrap;}
+    .container .h1{text-align: center;}
+    .teams, .players, .actions { margin-top: 20px; width: 100%; max-width: 400px;}
+    .team, .player, .sold-players { margin: 10px; border: 1px solid #ddd; padding: 10px; width: 20%; }
+    .team { display: inline-block; vertical-align: top; padding: 10px; border-radius: 8px; width: 500px; }
+    .team h3 { margin-bottom: 10px; }
+    .team ul { list-style: none; padding: 0; }
+    .team li { margin: 5px 0; }
+    .team-container { display: flex; justify-content: space-between; margin-bottom: 20px;}
+    .timer { font-weight: bold; margin-top: 10px; }
+    .players { position: relative;
+        max-height:  700px;
+        width: 400px;
+        overflow: scroll;}
+     
+    .player-profile { margin: 15px auto; width: 300px; padding: 15px; border-radius: 8px; background-color: #fff; border: 1px solid #ddd; text-align: center; }
+    .player-profile img { max-width: 100px; border-radius: 50%; margin-bottom: 10px; }
+    .button { padding: 8px 15px; margin: 5px; cursor: pointer; border: none; color: #fff; font-weight: bold; border-radius: 5px; }
+    .sold { background-color: #4CAF50; }
+    .unsold { background-color: #f44336; }
+    .bid { background-color: #008CBA; }
+    .next { background-color: #FF9800; }
+    .team1 { background-color: #008CBA; color: white; position:relative; }
+    .team2 { background-color: #0e02f3; color: white; }
+    .team3 { background-color: #d2e810; color: white; }
+    .team4 { background-color: #f9100c; color: white; }
+    .team5 { background-color: #9C27B0; color: white; }
+    .team6 { background-color: #fe680b; color: white; }
+    .team7 { background-color: #c53724; color: white; }
+    .team8 { background-color: #f718fb; color: white; }
+    .team9 { background-color: #6688a1; color: white; }
+    .team10 { background-color: #4490ec; color: white; }
+    table { width: 100%; margin: 15px 0; border-collapse: collapse; }
+    th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }
+    th { background-color: #f4f4f4; }
+
+    .bid-history {
+        margin-top: 20px;
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        background-color: #3c3636;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        color: wheat;
+      }
+      .bid-history h2 { margin-bottom: 10px; }
+      .bid-history table { width: 100%; border-collapse: collapse; color:#f4f4f4; }
+      .bid-history th, .bid-history td { padding: 8px; text-align: center; border: 1px solid #ddd; }
+      .bid-history th { background-color:  #3c3636; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="players">
+      <h2>Player List</h2>
+      <table id="playerList">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Name</th>
+            <th>Base Price</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="image"><h1>IPL Auction 2025</h1><img src="https://1bharatnews.com/wp-content/uploads/2023/12/cropped-Arjun230_1092.jpg" alt="" width="390px" height="600px"></div>
+    <div class="actions">
+      <h2>Current Player</h2>
+      <div id="currentPlayer" class="player-profile">No player yet</div>
+      <div class="timer" id="timerContainer">Time Remaining: <span id="timer">10</span>s</div>
+      <p>Highest Bid: ₹<span id="highestBid">0</span></p>
+      <p>Current Highest Bidder: <span id="highestBidder">None</span></p>
+      <button class="button bid" onclick="placeBid()">Bid</button>
+      <button class="button sold" onclick="sellPlayer()">Sold</button>
+      <button class="button unsold" onclick="markUnsold()">Unsold</button>
+      <button class="button next" onclick="nextPlayer()">Next Player</button>
+    </div>
+
+    <div class="bid-history">
+        <h2>Highest Bid of Players</h2>
+        <table id="bidHistoryTable">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Player Name</th>
+              <th>Final Bid</th>
+              <th>Winning Team</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Bid history rows will be added here by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    <div class="teams">
+      <h2>Teams</h2>
+      <div id="teamsContainer"></div>
+    </div>
+
+    
+  </div>
+
+  <script>
+    const players = [
+      { name: "Rishabh Pant", basePrice: 100000, country: "India", runs: 6000, category: "Wicket-Keeper Batsman",  image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEywTyA84Ds5epyEo7PAJU1h1npntjZPrs5g&s" },
+      { name: "Ruturaj Gaikwad", basePrice: 100000, country: "India", runs: 3000, category: "Batsman",  image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQzHljJZg64HxLPs0pQplEUKxRti3g47JMNQ&s" },
+      { name: "David Warner", basePrice: 200000, country: "Australia", runs: 4000, category: "Batsman",  image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYT08cYSimHck3aEHfbyg_vNYOf91_NzWFAw&s" },
+      { name: "Abhisekh Sharma", basePrice: 50000, country: "India", runs: 5000, category: "Batsman",  image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI0_cKLdlYHrs4OVwBhz3cwxVAEl-0vtzb4w&s" },
+      { name: "Moeen Ali", basePrice: 100000, country: "England", runs: 3500, category: "All-rounder", economy: 5.7, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/206.png" },
+      { name: "Jos Buttler", basePrice: 200000, country: "England", runs: 3500, category: "Wicket-Keeper Batsman",  image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/182.png" },
+      { name: "Rachin Ravindra", basePrice: 80000, country: "New Zealand", runs: 1500, category: "All-rounder", economy: 7.1, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/724.png"},
+      { name: "Glenn Maxwell", basePrice: 150000, country: "Australia", runs: 4500, category: "All-rounder", economy: 6.1, image: "https://documents.iplt20.com/playerheadshot/ipl/284/282.png" },
+      { name: "Deepak Chahar", basePrice: 100000, country: "India", runs: 962, category: "All-rounder", economy: 7.1, image: "https://documents.iplt20.com/playerheadshot/ipl/284/140.png"},
+      { name: "Mohammad Shami", basePrice: 100000, country: "India", runs: 560, category: "Bowler", economy: 4.1, image: "https://www.gujarattitansipl.com/static-assets/images/players/28994.png?v=4.86"},
+      { name: "Ravichandra Aswin", basePrice: 100000, country: "India", runs: 1580, category: "All-rounder", economy: 7.8, image: "https://admin.matchtimings.com/assets/player/5a9193fa62f5bba6751e7dc1bb1b2fc1.png"},
+      { name: "Sunil Narine", basePrice: 100000, country: "West Indies", runs: 2105, category: "All-rounder", economy: 6.1, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/156.png"},
+      { name: "Suresh Raina", basePrice: 200000, country: "India", runs: 5905, category: "All-rounder", economy: 6.1, image: "https://documents.iplt20.com/playerheadshot/ipl/284/14.png"},
+      { name: "Shreyas Iyer", basePrice: 100000, country: "India", runs: 2105, category: "All-rounder", economy: 6.1, image: "https://www.kkr.in/static-assets/images/players/63961.png?v=111.38"},
+      { name: "Rashid Khan", basePrice: 100000, country: "Afghanisthan", runs: 1995, category: "All-rounder", economy: 6.1, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/218.png"},
+      { name: "Shivam Dube", basePrice: 100000, country: "India", runs: 1105, category: "All-rounder", economy: 6.1, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/211.png"},
+      { name: "Chris Gayle", basePrice: 200000, country: "West Indies", runs: 5185, category: "All-rounder", economy: 6.1, image: "https://documents.iplt20.com/playerheadshot/ipl/284/236.png"},
+      { name: "Dhruv Jurel", basePrice: 50000, country: "India", runs: 805, category: "All-rounder", economy: 6.1, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkS95cOXf5HXGqzNGxgDvvYAzWZ_uYcWT-7w&s"},
+      { name: "Mitchell Marsh", basePrice: 100000, country: "Australia", runs: 2305, category: "All-rounder", economy: 7.7, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS12US4xaMJDxUuhk1W03OOhHm-qu7giWsjIQ&s"},
+      { name: "Yashasvi Jaiswal", basePrice: 100000, country: "India", runs: 1905, category: "Batsman",  image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/533.png"},
+      { name: "Matheesha Pathirana", basePrice: 100000, country: "Sri Lanka", runs: 105, category: "Fast Bowler", economy: 5.5, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/1014.png"},
+      { name: "A B De Villiers", basePrice: 200000, country: "South Africa", runs: 3995, category: "Batsman", image: "https://d1k8sn41pix00a.cloudfront.net/media/players/photos/AB-de-Villiers-CT17.png"},
+      { name: "Varun Chakaravarthy", basePrice: 100000, country: "India", runs: 310, category: "Off-Spinner", economy: 6.4, image: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh1e9dKvoWEvOUYpWqxXObh2FqfQjh91bP19t6b5acI47-FoFrv_07Zi4d-tpGOZT96XixKlw3MUL3hZHQnfM6Fdi7j5rqprYuwl2qi5CpQ2wkCAeG1iNbBKUlJFviW4EvHkq31XMklh-m403Ku8KX8k3chzX1MIZYoZSQOaRoSCjPcpzQfuaj_9iHj/s1024/Varun-Chakaravarthy.png"},
+      { name: "Heinrich Klaasen", basePrice: 150000, country: "South Africa", runs: 2185, category: "Wicket-Keeper Batsman",  image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/202.png"},
+      { name: "Mayank Yadav", basePrice: 50000, country: "India", runs: 205, category: "Fast-Bowler", economy: 6.3, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/987.png"},
+      { name: "Rahul Tewatia", basePrice: 100000, country: "India", runs: 2105, category: "All-rounder", economy: 7.7, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/120.png"},
+      { name: "Mohammad Siraj", basePrice: 100000, country: "India", runs: 360, category: "Medium-Fast-Bowler", economy: 7.1, image: "https://www.iplbetonline.in/wp-content/uploads/2023/04/3840-780x780.png"},
+      { name: "Steve Smith", basePrice: 150000, country: "Australia", runs: 3580, category: "Batsman",  image: "https://documents.iplt20.com/playerheadshot/ipl/284/271.png"},
+      { name: "Shardul Thakur", basePrice: 100000, country: "India", runs: 1105, category: "All-rounder", economy: 6.1, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/105.png"},
+      { name: "Shane Watson", basePrice: 200000, country: "Australia", runs: 2905, category: "All-rounder", economy: 6.9, image: "https://documents.iplt20.com/playerheadshot/ipl/284/227.png"},
+      { name: "Yuvraj Singh", basePrice: 100000, country: "India", runs: 2995, category: "All-rounder", economy: 6.1, image: "https://documents.iplt20.com/playerheadshot/ipl/284/113.png"},
+      { name: "Hardik Pandya", basePrice: 150000, country: "India", runs: 3895, category: "All-rounder", economy: 7.8, image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/54.png"},
+      { name: "Imraan Tahir", basePrice: 150000, country: "South Africa", runs: 335, category: "Bowler", economy: 5.3, image: "https://parimatchnews.com/wp-content/uploads/2020/11/Imran-Tahir.png"},
+      { name: "Ben Stokes", basePrice: 200000, country: "England", runs: 1185, category: "All-rounder", economy: 6.1, image: "https://www.iplbetonline.in/wp-content/uploads/2023/04/177-1-780x780.png"},
+      { name: "Harshit Rana", basePrice: 50000, country: "India", runs: 85, category: "Fast Bowler", economy: 5.6, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2gv8OXibDcM_n2lWAIaXxPG_NiT86X4DTEg&s"},
+      { name: "Mitchell Starc", basePrice: 200000, country: "Australia", runs: 205, category: "Fast-Bowler", economy: 4.7, image: "https://www.yolo247.co/sports/tournaments/wp-content/uploads/2024/01/Mitchell-Starc.png"},
+      { name: "Ishan Kishan", basePrice: 100000, country: "India", runs: 1905, category: "Wicket-Keeper Batsman",  image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/164.png"},
+      { name: "Mitchell Santner", basePrice: 150000, country: "New Zealand", runs: 335, category: "Bowler", economy: 5.3, image: "https://indianden.in/wp-content/uploads/2023/05/75.png"},
+      { name: "Trent Boult", basePrice: 200000, country: "New Zealand", runs: 1185, category: "Bowler",  image: "https://documents.iplt20.com/ipl/IPLHeadshot2024/66.png"},
+      { name: "Prithvi Shaw", basePrice: 50000, country: "India", runs: 1505, category: "Batsman",  image: "https://ipltable.in/wp-content/uploads/2024/02/image-58-700x700.jpeg"},
+      ];
+    let currentBid = 0, currentBidder = null, timer, timeRemaining = 10, currentIndex = 0;
+
+    const teams = [
+      { name: "DC", budget: 6000000, players: [], retained: [{ name: "Kuldeep Yadav", price: 1400000 },{ name: "Axar Patel", price: 1400000 }] , colorClass: "team1" },
+      { name: "MI", budget: 6000000, players: [], retained: [{ name: "Rohit Sharma", price: 1400000 },{ name: "Jasprit Bumrah", price: 1400000}] , colorClass: "team2" },
+      { name: "CSK", budget: 6000000, players: [], retained: [{ name: "MS Dhoni", price: 1400000 },{ name: "Jadeja", price: 1400000 }] , colorClass: "team3" },
+      { name: "RCB", budget: 6000000, players: [], retained: [{ name: "Virat Kohli", price: 1400000 },{ name: "Rajat Patidar", price: 1400000 }] , colorClass: "team4" },
+      { name: "KKR", budget: 6000000, players: [], retained: [{ name: "Andre Russell", price: 1400000 },{ name: "Rinku Singh", price: 1400000 }] , colorClass: "team5" },
+      { name: "SRH", budget: 6000000, players: [], retained: [{ name: "Pat Cummians", price: 1400000 },{ name: "Trevis Head", price: 1400000 }] , colorClass: "team6" },
+      { name: "PBKS", budget: 6000000, players: [], retained: [{ name: "Ashutosh Sharma", price: 1400000 },{ name: "Shashak Singh", price: 1400000 }] , colorClass: "team7" },
+      { name: "RR", budget: 6000000, players: [], retained: [{ name: "Sanju Samson", price: 1400000 },{ name: "Riyan Parag", price: 1400000 }] , colorClass: "team8" },
+      { name: "GT", budget: 6000000, players: [], retained: [{ name: "Shubhman Gill", price: 1400000 },{ name: "Sai Sudarshan", price: 1400000 }] , colorClass: "team9" },
+      { name: "LSG", budget: 6000000, players: [], retained: [{ name: "Nicolas Pooran", price: 1400000 },{ name: "Ravi Bishnoi", price: 1400000 }] , colorClass: "team10" }
+    ];
+
+    
+
+    function renderTeams() {
+      const teamsContainer = document.getElementById("teamsContainer");
+      teamsContainer.innerHTML = '';
+      teams.forEach(team => {
+        const teamDiv = document.createElement("div");
+        teamDiv.classList.add("team", team.colorClass);
+        teamDiv.innerHTML = `
+          <h3>${team.name}</h3>
+          <p>Budget: ₹${team.budget}</p>
+          <p>Retained Players:</p>
+          <ul>
+            ${team.retained.map(player => `<li>${player.name} - ₹${player.price}</li>`).join('')}
+          </ul>
+          <p>Players:</p>
+          <ul>
+            ${team.players.map(player => `<li>${player.name} - ₹${player.price}</li>`).join('')}
+          </ul>
+        `;
+        teamsContainer.appendChild(teamDiv);
+      });
+    }
+
+    function renderPlayerList() {
+      const playerListContainer = document.getElementById("playerList").getElementsByTagName("tbody")[0];
+      playerListContainer.innerHTML = '';
+      players.forEach((player, index) => {
+        const playerRow = document.createElement("tr");
+        playerRow.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${player.name}</td>
+          <td>₹${player.basePrice}</td>
+        `;
+        playerRow.onclick = () => loadPlayer(player);
+        playerListContainer.appendChild(playerRow);
+      });
+    }
+
+    function announcePlayerDetails(player) {
+        const textToSpeak = `Next player is ${player.name}. Base price is ₹${player.basePrice}. ${player.category}Player`;
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = 'en-IND'; // Set language to English
+        speechSynthesis.speak(utterance); // Speak the announcement
+      }
+      
+      
+
+
+
+    function loadPlayer(player) {
+      document.getElementById("currentPlayer").innerHTML = `
+        <img src="${player.image}" alt="${player.name}">
+        <h4>${player.name}</h4>
+        <p>Base Price: ₹${player.basePrice}</p>
+        <p>Country: ${player.country}</p>
+        <p>Runs: ${player.runs}</p>
+        <p>Category: ${player.category}</p>
+        <p>Economy: ${player.economy}</p>
+      `;
+      currentBid = player.basePrice;
+      currentBidder = null;
+      timeRemaining = 20;
+      document.getElementById("timer").innerText = timeRemaining;
+      startTimer();
+
+      announcePlayerDetails(player);
+      
+    }
+
+
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        if (timeRemaining > 0) {
+          timeRemaining--;
+          document.getElementById("timer").innerText = timeRemaining;
+        } else {
+          clearInterval(timer);
+          sellPlayer();
+        }
+      }, 1000);
+    }
+
+    function placeBid() {
+      const teamName = prompt("Enter team name to bid:");
+      const team = teams.find(t => t.name === teamName);
+      if (!team) {
+        alert("Invalid team name");
+        return;
+      }
+      const bidAmount = parseInt(prompt("Enter bid amount (greater than current bid):"));
+      if (bidAmount > currentBid && bidAmount <= team.budget) {
+        currentBid = bidAmount;
+        currentBidder = team;
+        timeRemaining = 10;
+        document.getElementById("timer").innerText = timeRemaining;
+        alert(`${team.name} bids ₹${bidAmount}`);
+      } else {
+        alert("Bid is too low or exceeds team budget.");
+      }
+    }
+
+    function sellPlayer() {
+      if (!currentBidder) {
+        alert("No bids placed.");
+        return;
+      }
+      currentBidder.budget -= currentBid;
+      currentBidder.players.push({ name: players[currentIndex].name, price: currentBid });
+      alert(`${players[currentIndex].name} sold to ${currentBidder.name} for ₹${currentBid}`);
+      renderTeams();
+      nextPlayer();
+    }
+
+    function markUnsold() {
+      alert(`${players[currentIndex].name} is unsold.`);
+      nextPlayer();
+    }
+
+    function nextPlayer() {
+      currentIndex++;
+      if (currentIndex >= players.length) {
+        alert("Auction Ended");
+        return;
+      }
+      loadPlayer(players[currentIndex]);
+    }
+
+    renderTeams();
+    renderPlayerList();
+    loadPlayer(players[currentIndex]);
+
+    const bidHistory = [];
+
+    function renderBidHistory() {
+      const bidHistoryTable = document.getElementById("bidHistoryTable").getElementsByTagName("tbody")[0];
+      bidHistoryTable.innerHTML = "";
+      bidHistory.forEach((entry, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${entry.playerName}</td>
+          <td>₹${entry.finalBid}</td>
+          <td>${entry.winningTeam || "Unsold"}</td>
+        `;
+        bidHistoryTable.appendChild(row);
+      });
+    }
+
+    function sellPlayer() {
+      if (!currentBidder) {
+        alert("No bids placed.");
+        return;
+      }
+      currentBidder.budget -= currentBid;
+      currentBidder.players.push({ name: players[currentIndex].name, price: currentBid });
+
+      // Store the player sale details in bid history
+      bidHistory.push({
+        playerName: players[currentIndex].name,
+        finalBid: currentBid,
+        winningTeam: currentBidder.name
+      });
+      
+      alert(`${players[currentIndex].name} sold to ${currentBidder.name} for ₹${currentBid}`);
+      renderTeams();
+      renderBidHistory();  // Update bid history display
+      nextPlayer();
+    }
+
+    function markUnsold() {
+      // Add unsold player to bid history
+      bidHistory.push({
+        playerName: players[currentIndex].name,
+        finalBid: 0,
+        winningTeam: "Unsold"
+      });
+      alert(`${players[currentIndex].name} is unsold.`);
+      renderBidHistory();  // Update bid history display
+      nextPlayer();
+    }
+
+    
+
+    // Initial render calls
+    renderTeams();
+    renderPlayerList();
+    renderBidHistory();  // Initial call to render an empty bid history
+    loadPlayer(players[currentIndex]);
+  </script>
+</body>
+</html>
